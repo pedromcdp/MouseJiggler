@@ -1,5 +1,7 @@
 # MouseJiggler 🖱️🟢
 
+[![Release](https://github.com/pedromcdp/MouseJiggler/actions/workflows/release.yml/badge.svg)](https://github.com/pedromcdp/MouseJiggler/actions/workflows/release.yml)
+
 A tiny, native macOS menu bar app that nudges your mouse on a schedule —
 just enough to keep Teams, Slack, or your screen saver from marking you
 away. Free, local, open source. No telemetry, no background server, no
@@ -50,6 +52,21 @@ Click the menu bar icon for:
 - **Start / Stop** — pause without quitting
 - **Preferences…** — schedule, interval, app-awareness, launch at login
 - **Quit**
+
+## Releases
+
+Pushing a version tag (`v1.1`, `v1.2.3`, etc.) triggers
+[`.github/workflows/release.yml`](.github/workflows/release.yml), which
+builds the app on a real macOS runner, zips it, and attaches it to a new
+GitHub Release automatically:
+
+```bash
+git tag v1.1
+git push origin v1.1
+```
+
+No need to manually build and upload a `.zip` for each release — just tag
+and push.
 
 ## Project structure
 
