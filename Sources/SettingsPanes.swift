@@ -11,6 +11,10 @@ struct GeneralPane: View {
         ("2 minutes", 120), ("5 minutes", 300)
     ]
 
+    private let thresholdOptions: [(String, TimeInterval)] = [
+        ("2 seconds", 2), ("5 seconds", 5), ("10 seconds", 10), ("30 seconds", 30)
+    ]
+
     var body: some View {
         Form {
             Section("Functionality") {
@@ -41,19 +45,44 @@ struct GeneralPane: View {
                 .help("How often the cursor nudges while active.")
             }
 
+            Section {
+                LabeledContent {
+                    Toggle("", isOn: $store.settings.pauseWhenUserActive).labelsHidden()
+                } label: {
+                    RowLabel(icon: "hand.tap.fill", tint: .purple, title: "Skip if you're already active")
+                }
+                .help("Won't nudge the mouse if you've used it or the keyboard more recently than the threshold below.")
+
+                if store.settings.pauseWhenUserActive {
+                    LabeledContent {
+                        Picker("", selection: $store.settings.activityThreshold) {
+                            ForEach(thresholdOptions, id: \.1) { label, value in
+                                Text(label).tag(value)
+                            }
+                        }
+                        .labelsHidden()
+                        .frame(width: 130)
+                    } label: {
+                        RowLabel(icon: "gauge", tint: .purple, title: "Activity threshold")
+                    }
+                }
+            } footer: {
+                Text("Checks real system idle time — the same signal macOS uses for the screen saver — so it never nudges the mouse while you're already at the keyboard.")
+            }
+
             Section("Status") {
                 LabeledContent {
                     HStack(spacing: 6) {
                         Circle()
-                            .fill(engine.isActiveNow ? Palette.accent : Color.secondary)
+                            .fill(statusColor)
                             .frame(width: 8, height: 8)
                         Text(statusTitle)
                             .foregroundColor(.secondary)
                     }
                 } label: {
                     RowLabel(
-                        icon: engine.isActiveNow ? "bolt.fill" : "bolt.slash",
-                        tint: engine.isActiveNow ? .green : .gray,
+                        icon: engine.activityState == .jiggling ? "bolt.fill" : "bolt.slash",
+                        tint: statusColor,
                         title: "Current state"
                     )
                 }
@@ -63,8 +92,20 @@ struct GeneralPane: View {
     }
 
     private var statusTitle: String {
-        if !engine.isRunning { return "Stopped" }
-        return engine.isActiveNow ? "Currently jiggling" : "Waiting for schedule / app match"
+        switch engine.activityState {
+        case .stopped: return "Stopped"
+        case .waitingForConditions: return "Waiting for schedule / app match"
+        case .skippingUserActive: return "Skipping — you're already active"
+        case .jiggling: return "Currently jiggling"
+        }
+    }
+
+    private var statusColor: Color {
+        switch engine.activityState {
+        case .stopped, .waitingForConditions: return .secondary
+        case .skippingUserActive: return .yellow
+        case .jiggling: return Palette.accent
+        }
     }
 }
 
@@ -207,7 +248,7 @@ struct AboutPane: View {
             Text("MouseJiggler")
                 .font(.title2).bold()
 
-            Text("Version 1.1")
+            Text("Version 1.2")
                 .font(.callout)
                 .foregroundColor(.secondary)
 

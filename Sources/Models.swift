@@ -58,4 +58,6 @@ struct AppSettings: Codable, Equatable {
         "com.tinyspeck.slackmacgap" // Slack
     ]
     var launchAtLogin: Bool = false
+    var pauseWhenUserActive: Bool = true
+    var activityThreshold: TimeInterval = 5
 }

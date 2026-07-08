@@ -1,12 +1,33 @@
 import Cocoa
 import Combine
 
+/// The four states the engine can be in, used to drive both the Preferences
+/// status row and the menu bar dropdown from one place instead of two
+/// separately-maintained string computations.
+enum ActivityState {
+    case stopped
+    case waitingForConditions   // schedule or app-detection not satisfied
+    case skippingUserActive     // conditions met, but you're already at the mouse/keyboard
+    case jiggling
+}
+
 final class JiggleEngine: ObservableObject {
     /// Whether the user has toggled the app "on" via the menu/UI.
     @Published var isRunning = false
 
-    /// Whether it is *actually* jiggling right now, factoring in schedule + app-awareness.
+    /// Whether schedule + app-awareness conditions are currently satisfied.
     @Published var isActiveNow = false
+
+    /// True when conditions are satisfied but the last tick skipped the
+    /// actual jiggle because you were already using the mouse/keyboard.
+    @Published var isSkippingDueToActivity = false
+
+    var activityState: ActivityState {
+        if !isRunning { return .stopped }
+        if !isActiveNow { return .waitingForConditions }
+        if isSkippingDueToActivity { return .skippingUserActive }
+        return .jiggling
+    }
 
     private var jiggleTimer: Timer?
     private var evaluationTimer: Timer?
@@ -37,6 +58,7 @@ final class JiggleEngine: ObservableObject {
         jiggleTimer?.invalidate(); jiggleTimer = nil
         evaluationTimer?.invalidate(); evaluationTimer = nil
         isActiveNow = false
+        isSkippingDueToActivity = false
     }
 
     private func restartJiggleTimer() {
@@ -50,11 +72,21 @@ final class JiggleEngine: ObservableObject {
     private func tick() {
         evaluateActivity()
         guard isActiveNow else { return }
+
+        if store.settings.pauseWhenUserActive && isUserRecentlyActive() {
+            isSkippingDueToActivity = true
+            return
+        }
+
+        isSkippingDueToActivity = false
         jiggle()
     }
 
     private func evaluateActivity() {
         isActiveNow = isRunning && withinSchedule() && targetAppsSatisfied()
+        if !isActiveNow {
+            isSkippingDueToActivity = false
+        }
     }
 
     private func withinSchedule() -> Bool {
@@ -87,6 +119,18 @@ final class JiggleEngine: ObservableObject {
         guard store.settings.onlyWhenTargetAppsRunning else { return true }
         let runningIDs = Set(NSWorkspace.shared.runningApplications.compactMap { $0.bundleIdentifier })
         return !runningIDs.isDisjoint(with: store.settings.targetBundleIDs)
+    }
+
+    /// Seconds since the last real mouse or keyboard input, system-wide —
+    /// the same mechanism macOS itself uses to decide when to dim the
+    /// display or trigger the screen saver.
+    private func systemIdleSeconds() -> TimeInterval {
+        let anyInputEventType = CGEventType(rawValue: ~UInt32(0))!
+        return CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: anyInputEventType)
+    }
+
+    private func isUserRecentlyActive() -> Bool {
+        systemIdleSeconds() < store.settings.activityThreshold
     }
 
     /// Nudges the cursor 1px and back — enough to reset the OS/Teams idle

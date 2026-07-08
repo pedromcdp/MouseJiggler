@@ -28,10 +28,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         engine.start()
 
-        engine.$isActiveNow
+        Publishers.CombineLatest3(engine.$isRunning, engine.$isActiveNow, engine.$isSkippingDueToActivity)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] active in
-                self?.statusItem.button?.title = active ? "🟢" : "⚪️"
+            .sink { [weak self] running, active, skipping in
+                guard let self else { return }
+                if !running || !active {
+                    self.statusItem.button?.title = "⚪️"
+                } else if skipping {
+                    self.statusItem.button?.title = "🟡"
+                } else {
+                    self.statusItem.button?.title = "🟢"
+                }
             }
             .store(in: &cancellables)
     }
@@ -81,14 +88,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
     }
 
-    /// Distinguishes "engine is on" (isRunning, controlled by Start/Stop) from
-    /// "actually jiggling right now" (isActiveNow, controlled by schedule and
-    /// app-detection). Without this line, "Stop" staying put while a schedule
-    /// pauses the actual jiggling looks like a bug rather than two separate
-    /// states doing exactly what they're supposed to.
+    /// Mirrors JiggleEngine.activityState into menu-appropriate text with an
+    /// emoji prefix, so Preferences and the menu never describe state differently.
     private var statusDescription: String {
-        if !engine.isRunning { return "⚪️ Stopped" }
-        return engine.isActiveNow ? "🟢 Currently jiggling" : "⏸️ Paused — outside schedule or app not running"
+        switch engine.activityState {
+        case .stopped: return "⚪️ Stopped"
+        case .waitingForConditions: return "⏸️ Paused — outside schedule or app not running"
+        case .skippingUserActive: return "🟡 Skipping — you're already active"
+        case .jiggling: return "🟢 Currently jiggling"
+        }
     }
 
     @objc private func toggleRunning() {

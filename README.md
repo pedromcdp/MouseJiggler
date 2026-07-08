@@ -12,9 +12,10 @@ subscription — same idea as movemouse.app, but yours.
 - **Menu bar only** — no Dock icon, lives quietly as a status item
 - **Custom schedule** — restrict jiggling to specific days and hours (e.g. weekdays 9–18)
 - **App-aware** — optionally only jiggle while Teams and/or Slack are actually running
+- **Real idle-detection** — skips the jiggle if you've genuinely used the mouse/keyboard recently (checks actual system idle time, the same signal macOS uses for the screen saver)
 - **Configurable interval** — 20s to 5 minutes
 - **Launch at login** — one toggle, no manual Login Items setup
-- **Live status** — menu bar icon shows 🟢 when actively jiggling, ⚪️ when idle/paused
+- **Live status** — menu bar icon shows 🟢 jiggling, 🟡 skipping (you're already active), ⚪️ stopped/paused
 
 ## Requirements
 
@@ -93,7 +94,6 @@ MouseJiggler/
 - [ ] Notarized, signed release builds via GitHub Actions
 - [ ] Mac App Store submission (requires Apple Developer account + proper signing identity)
 - [ ] Per-app custom idle thresholds
-- [ ] Optional real idle-detection (skip jiggling if you're already actively using the mouse/keyboard)
 
 Contributions and issues welcome once this lands on GitHub.
 
