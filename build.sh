@@ -24,6 +24,8 @@ swiftc -O Sources/*.swift -o "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
 echo "Copying resources..."
 cp Resources/Info.plist "$APP_BUNDLE/Contents/Info.plist"
 cp Resources/AppIcon.icns "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
+cp -R Resources/en.lproj "$APP_BUNDLE/Contents/Resources/en.lproj"
+cp -R Resources/pt-PT.lproj "$APP_BUNDLE/Contents/Resources/pt-PT.lproj"
 
 echo "Ad-hoc signing..."
 codesign --force --deep --sign - "$APP_BUNDLE"

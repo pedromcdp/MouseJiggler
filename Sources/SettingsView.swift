@@ -54,7 +54,7 @@ struct SettingsView: View {
                 } label: {
                     HStack(spacing: 9) {
                         SettingsIcon(systemName: tab.icon, tint: tab.tint, size: 22)
-                        Text(tab.rawValue)
+                        Text(LocalizedStringKey(tab.rawValue))
                         Spacer()
                     }
                     .padding(.horizontal, 8)

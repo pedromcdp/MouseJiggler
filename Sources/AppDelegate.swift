@@ -56,7 +56,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(NSMenuItem.separator())
 
         let toggleItem = NSMenuItem(
-            title: engine.isRunning ? "Stop" : "Start",
+            title: engine.isRunning ? NSLocalizedString("Stop", comment: "") : NSLocalizedString("Start", comment: ""),
             action: #selector(toggleRunning),
             keyEquivalent: ""
         )
@@ -65,12 +65,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
-        let intervalHeader = NSMenuItem(title: "Jiggle Interval", action: nil, keyEquivalent: "")
+        let intervalHeader = NSMenuItem(title: NSLocalizedString("Jiggle Interval", comment: ""), action: nil, keyEquivalent: "")
         intervalHeader.isEnabled = false
         menu.addItem(intervalHeader)
 
         for (label, seconds) in intervalOptions {
-            let item = NSMenuItem(title: label, action: #selector(setInterval(_:)), keyEquivalent: "")
+            let item = NSMenuItem(title: NSLocalizedString(label, comment: ""), action: #selector(setInterval(_:)), keyEquivalent: "")
             item.target = self
             item.representedObject = seconds
             item.state = (seconds == store.settings.interval) ? .on : .off
@@ -80,22 +80,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
-        let prefsItem = NSMenuItem(title: "Preferences…", action: #selector(openSettings), keyEquivalent: ",")
+        let prefsItem = NSMenuItem(title: NSLocalizedString("Preferences…", comment: ""), action: #selector(openSettings), keyEquivalent: ",")
         prefsItem.target = self
         menu.addItem(prefsItem)
 
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: NSLocalizedString("Quit", comment: ""), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
     }
 
     /// Mirrors JiggleEngine.activityState into menu-appropriate text with an
     /// emoji prefix, so Preferences and the menu never describe state differently.
     private var statusDescription: String {
         switch engine.activityState {
-        case .stopped: return "⚪️ Stopped"
-        case .waitingForConditions: return "⏸️ Paused — outside schedule or app not running"
-        case .skippingUserActive: return "🟡 Skipping — you're already active"
-        case .jiggling: return "🟢 Currently jiggling"
+        case .stopped: return "⚪️ " + NSLocalizedString("Stopped", comment: "")
+        case .waitingForConditions: return "⏸️ " + NSLocalizedString("Paused — outside schedule or app not running", comment: "")
+        case .skippingUserActive: return "🟡 " + NSLocalizedString("Skipping — you're already active", comment: "")
+        case .jiggling: return "🟢 " + NSLocalizedString("Currently jiggling", comment: "")
         }
     }
 
@@ -127,7 +127,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 defer: false
             )
             window.contentViewController = hosting
-            window.title = "MouseJiggler Preferences"
+            window.title = NSLocalizedString("MouseJiggler Preferences", comment: "")
             window.titleVisibility = .hidden
             window.titlebarAppearsTransparent = true
             window.isReleasedWhenClosed = false

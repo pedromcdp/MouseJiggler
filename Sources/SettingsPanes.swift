@@ -37,7 +37,7 @@ struct GeneralPane: View {
                 LabeledContent {
                     Picker("", selection: $store.settings.interval) {
                         ForEach(intervalOptions, id: \.1) { label, value in
-                            Text(label).tag(value)
+                            Text(LocalizedStringKey(label)).tag(value)
                         }
                     }
                     .labelsHidden()
@@ -62,7 +62,7 @@ struct GeneralPane: View {
                     LabeledContent {
                         Picker("", selection: $store.settings.activityThreshold) {
                             ForEach(thresholdOptions, id: \.1) { label, value in
-                                Text(label).tag(value)
+                                Text(LocalizedStringKey(label)).tag(value)
                             }
                         }
                         .labelsHidden()
@@ -80,7 +80,7 @@ struct GeneralPane: View {
                         Circle()
                             .fill(statusColor)
                             .frame(width: 8, height: 8)
-                        Text(statusTitle)
+                        Text(LocalizedStringKey(statusTitle))
                             .foregroundColor(.secondary)
                     }
                 } label: {
@@ -213,7 +213,7 @@ struct DetectionPane: View {
                     } label: {
                         HStack(spacing: 10) {
                             SettingsIcon(systemName: "app.badge.fill", tint: .gray)
-                            Text(bundleID)
+                            Text(verbatim: bundleID)
                                 .font(.system(.body, design: .monospaced))
                         }
                     }
@@ -241,6 +241,10 @@ struct DetectionPane: View {
 // MARK: - About
 
 struct AboutPane: View {
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+    }
+
     var body: some View {
         VStack(spacing: 14) {
             Spacer(minLength: 20)
@@ -258,7 +262,7 @@ struct AboutPane: View {
             Text("MouseJiggler")
                 .font(.title2).bold()
 
-            Text("Version 1.2.1")
+            Text(String(format: NSLocalizedString("Version %@", comment: "App version shown in About"), appVersion))
                 .font(.callout)
                 .foregroundColor(.secondary)
 

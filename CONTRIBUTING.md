@@ -35,6 +35,17 @@ This isn't checked into the repo since it'd conflict with the plain
   for settings rows, colored `SettingsIcon` tiles rather than plain
   monochrome SF Symbols, no `NavigationSplitView` (it caused real layout bugs
   in this app's fixed-size window — see git history if curious).
+- **Adding user-facing text?** Add the English key to
+  `Resources/en.lproj/Localizable.strings` and (ideally) the Portuguese
+  translation to `Resources/pt-PT.lproj/Localizable.strings`. One gotcha:
+  SwiftUI only auto-localizes a string *literal* written directly at the
+  call site (`Text("Foo")`); a string that arrives via a variable or
+  property (`Text(someTitle)`, loop variables in `ForEach`, etc.) silently
+  skips localization unless wrapped explicitly:
+  `Text(LocalizedStringKey(someTitle))`. `RowLabel` and the interval/threshold
+  pickers already do this — follow that pattern for new variable-sourced
+  text. For `NSMenuItem` titles (AppKit, not SwiftUI), there's no automatic
+  path at all — always wrap with `NSLocalizedString(_:comment:)`.
 
 ## Reporting bugs
 

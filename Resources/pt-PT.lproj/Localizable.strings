@@ -1,0 +1,73 @@
+/* Sidebar tabs */
+"General" = "Geral";
+"Schedule" = "Horário";
+"Detection" = "Deteção";
+"About" = "Acerca";
+
+/* General pane */
+"Functionality" = "Funcionalidades";
+"Launch at login" = "Abrir no início de sessão";
+"Jiggle interval" = "Intervalo de agitação";
+"Starts MouseJiggler automatically when you log in." = "Inicia o MouseJiggler automaticamente ao iniciares sessão.";
+"How often the cursor nudges while active." = "Com que frequência o cursor se mexe enquanto está ativo.";
+"Skip if you're already active" = "Ignorar se já estiveres ativo";
+"Activity threshold" = "Limite de atividade";
+"Won't nudge the mouse if you've used it or the keyboard more recently than the threshold below." = "Não mexe no rato se o tiveres usado, ou ao teclado, mais recentemente do que o limite abaixo.";
+"Checks real system idle time — the same signal macOS uses for the screen saver — so it never nudges the mouse while you're already at the keyboard." = "Verifica o tempo real de inatividade do sistema — o mesmo sinal que o macOS usa para a proteção de ecrã — para nunca mexer no rato enquanto já estás a usar o teclado.";
+"Status" = "Estado";
+"Current state" = "Estado atual";
+
+/* Schedule pane */
+"Only run during set hours" = "Executar apenas no horário definido";
+"Off means MouseJiggler runs any time it's started, with no day/hour restriction." = "Desativado significa que o MouseJiggler funciona sempre que iniciado, sem restrição de dia ou hora.";
+"Hours" = "Horário";
+"Start time" = "Hora de início";
+"End time" = "Hora de fim";
+"Days" = "Dias";
+"Active days" = "Dias ativos";
+
+/* Detection pane */
+"Only jiggle while a target app is running" = "Agitar apenas enquanto uma app-alvo estiver aberta";
+"Checked every 15 seconds against the list below." = "Verificado a cada 15 segundos com base na lista abaixo.";
+"Target Apps" = "Apps-Alvo";
+"Add" = "Adicionar";
+"com.example.app (bundle ID)" = "com.example.app (ID do pacote)";
+"Tip: find a running app's bundle ID with `osascript -e 'id of app \"Teams\"'` in Terminal." = "Dica: encontra o ID do pacote de uma app em execução com `osascript -e 'id of app \"Teams\"'` no Terminal.";
+
+/* About pane */
+"Version %@" = "Versão %@";
+"A small, native menu bar utility that keeps your status active on Teams, Slack, or anything else that watches for mouse activity." = "Um pequeno utilitário nativo da barra de menus que mantém o teu estado ativo no Teams, Slack, ou em qualquer coisa que verifique a atividade do rato.";
+
+/* Interval / threshold option labels (shared by menu + pickers) */
+"20 seconds" = "20 segundos";
+"30 seconds" = "30 segundos";
+"1 minute" = "1 minuto";
+"2 minutes" = "2 minutos";
+"5 minutes" = "5 minutos";
+"2 seconds" = "2 segundos";
+"5 seconds" = "5 segundos";
+"10 seconds" = "10 segundos";
+
+/* Status strings (shared by Preferences + menu) */
+"Stopped" = "Parado";
+"Waiting for schedule / app match" = "À espera do horário / app";
+"Skipping — you're already active" = "A ignorar — já estás ativo";
+"Currently jiggling" = "A agitar";
+"Paused — outside schedule or app not running" = "Em pausa — fora do horário ou app fechada";
+
+/* Menu bar dropdown */
+"Stop" = "Parar";
+"Start" = "Iniciar";
+"Jiggle Interval" = "Intervalo de Agitação";
+"Preferences…" = "Preferências…";
+"Quit" = "Sair";
+"MouseJiggler Preferences" = "Preferências do MouseJiggler";
+
+/* Weekday abbreviations — Portuguese traditionally numbers weekdays */
+"Su" = "Do";
+"Mo" = "2ª";
+"Tu" = "3ª";
+"We" = "4ª";
+"Th" = "5ª";
+"Fr" = "6ª";
+"Sa" = "Sá";

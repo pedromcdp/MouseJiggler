@@ -42,6 +42,7 @@ subscription — same idea as movemouse.app, but yours.
 - **Configurable interval** — 20s to 5 minutes
 - **Launch at login** — one toggle, no manual Login Items setup
 - **Live status** — menu bar icon shows 🟢 jiggling, 🟡 skipping (you're already active), ⚪️ stopped/paused
+- **Localized** — English and European Portuguese (pt-PT), following your macOS language setting automatically
 
 ## Requirements
 
@@ -116,7 +117,9 @@ MouseJiggler/
 ├── Resources/
 │   ├── Info.plist
 │   ├── AppIcon-1024.png         # source icon (converted to .icns at build time)
-│   └── social-preview.png       # GitHub social preview card
+│   ├── social-preview.png       # GitHub social preview card
+│   ├── en.lproj/Localizable.strings    # English (base)
+│   └── pt-PT.lproj/Localizable.strings # European Portuguese
 ├── docs/screenshots/            # README screenshots
 ├── scripts/make_icon.sh         # PNG → .icns conversion
 ├── .github/workflows/release.yml# tag-triggered build & release automation

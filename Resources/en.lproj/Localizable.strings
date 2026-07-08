@@ -1,0 +1,73 @@
+/* Sidebar tabs */
+"General" = "General";
+"Schedule" = "Schedule";
+"Detection" = "Detection";
+"About" = "About";
+
+/* General pane */
+"Functionality" = "Functionality";
+"Launch at login" = "Launch at login";
+"Jiggle interval" = "Jiggle interval";
+"Starts MouseJiggler automatically when you log in." = "Starts MouseJiggler automatically when you log in.";
+"How often the cursor nudges while active." = "How often the cursor nudges while active.";
+"Skip if you're already active" = "Skip if you're already active";
+"Activity threshold" = "Activity threshold";
+"Won't nudge the mouse if you've used it or the keyboard more recently than the threshold below." = "Won't nudge the mouse if you've used it or the keyboard more recently than the threshold below.";
+"Checks real system idle time — the same signal macOS uses for the screen saver — so it never nudges the mouse while you're already at the keyboard." = "Checks real system idle time — the same signal macOS uses for the screen saver — so it never nudges the mouse while you're already at the keyboard.";
+"Status" = "Status";
+"Current state" = "Current state";
+
+/* Schedule pane */
+"Only run during set hours" = "Only run during set hours";
+"Off means MouseJiggler runs any time it's started, with no day/hour restriction." = "Off means MouseJiggler runs any time it's started, with no day/hour restriction.";
+"Hours" = "Hours";
+"Start time" = "Start time";
+"End time" = "End time";
+"Days" = "Days";
+"Active days" = "Active days";
+
+/* Detection pane */
+"Only jiggle while a target app is running" = "Only jiggle while a target app is running";
+"Checked every 15 seconds against the list below." = "Checked every 15 seconds against the list below.";
+"Target Apps" = "Target Apps";
+"Add" = "Add";
+"com.example.app (bundle ID)" = "com.example.app (bundle ID)";
+"Tip: find a running app's bundle ID with `osascript -e 'id of app \"Teams\"'` in Terminal." = "Tip: find a running app's bundle ID with `osascript -e 'id of app \"Teams\"'` in Terminal.";
+
+/* About pane */
+"Version %@" = "Version %@";
+"A small, native menu bar utility that keeps your status active on Teams, Slack, or anything else that watches for mouse activity." = "A small, native menu bar utility that keeps your status active on Teams, Slack, or anything else that watches for mouse activity.";
+
+/* Interval / threshold option labels (shared by menu + pickers) */
+"20 seconds" = "20 seconds";
+"30 seconds" = "30 seconds";
+"1 minute" = "1 minute";
+"2 minutes" = "2 minutes";
+"5 minutes" = "5 minutes";
+"2 seconds" = "2 seconds";
+"5 seconds" = "5 seconds";
+"10 seconds" = "10 seconds";
+
+/* Status strings (shared by Preferences + menu) */
+"Stopped" = "Stopped";
+"Waiting for schedule / app match" = "Waiting for schedule / app match";
+"Skipping — you're already active" = "Skipping — you're already active";
+"Currently jiggling" = "Currently jiggling";
+"Paused — outside schedule or app not running" = "Paused — outside schedule or app not running";
+
+/* Menu bar dropdown */
+"Stop" = "Stop";
+"Start" = "Start";
+"Jiggle Interval" = "Jiggle Interval";
+"Preferences…" = "Preferences…";
+"Quit" = "Quit";
+"MouseJiggler Preferences" = "MouseJiggler Preferences";
+
+/* Weekday abbreviations */
+"Su" = "Su";
+"Mo" = "Mo";
+"Tu" = "Tu";
+"We" = "We";
+"Th" = "Th";
+"Fr" = "Fr";
+"Sa" = "Sa";

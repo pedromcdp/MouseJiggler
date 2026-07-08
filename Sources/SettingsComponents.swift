@@ -36,7 +36,10 @@ struct RowLabel: View {
     var body: some View {
         HStack(spacing: 10) {
             SettingsIcon(systemName: icon, tint: tint)
-            Text(title)
+            // title arrives as a String value (not a literal at this call
+            // site), so SwiftUI's automatic literal-to-LocalizedStringKey
+            // inference doesn't apply here — it has to be explicit.
+            Text(LocalizedStringKey(title))
         }
     }
 }
@@ -51,7 +54,7 @@ struct WeekdayPicker: View {
     var body: some View {
         HStack(spacing: 4) {
             ForEach(Weekday.allCases) { day in
-                Toggle(day.shortLabel, isOn: Binding(
+                Toggle(LocalizedStringKey(day.shortLabel), isOn: Binding(
                     get: { selectedDays.contains(day) },
                     set: { isOn in
                         if isOn {
