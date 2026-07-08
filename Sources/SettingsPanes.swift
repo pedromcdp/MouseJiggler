@@ -25,7 +25,10 @@ struct GeneralPane: View {
                             store.settings.launchAtLogin = newValue
                             LoginItemManager.setEnabled(newValue)
                         }
-                    )).labelsHidden()
+                    ))
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
                 } label: {
                     RowLabel(icon: "power", tint: .gray, title: "Launch at login")
                 }
@@ -38,7 +41,6 @@ struct GeneralPane: View {
                         }
                     }
                     .labelsHidden()
-                    .frame(width: 130)
                 } label: {
                     RowLabel(icon: "timer", tint: .orange, title: "Jiggle interval")
                 }
@@ -47,7 +49,10 @@ struct GeneralPane: View {
 
             Section {
                 LabeledContent {
-                    Toggle("", isOn: $store.settings.pauseWhenUserActive).labelsHidden()
+                    Toggle("", isOn: $store.settings.pauseWhenUserActive)
+                        .labelsHidden()
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
                 } label: {
                     RowLabel(icon: "hand.tap.fill", tint: .purple, title: "Skip if you're already active")
                 }
@@ -61,7 +66,6 @@ struct GeneralPane: View {
                             }
                         }
                         .labelsHidden()
-                        .frame(width: 130)
                     } label: {
                         RowLabel(icon: "gauge", tint: .purple, title: "Activity threshold")
                     }
@@ -118,7 +122,10 @@ struct SchedulePane: View {
         Form {
             Section {
                 LabeledContent {
-                    Toggle("", isOn: $store.settings.schedule.enabled).labelsHidden()
+                    Toggle("", isOn: $store.settings.schedule.enabled)
+                        .labelsHidden()
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
                 } label: {
                     RowLabel(icon: "clock.fill", tint: .blue, title: "Only run during set hours")
                 }
@@ -182,7 +189,10 @@ struct DetectionPane: View {
         Form {
             Section {
                 LabeledContent {
-                    Toggle("", isOn: $store.settings.onlyWhenTargetAppsRunning).labelsHidden()
+                    Toggle("", isOn: $store.settings.onlyWhenTargetAppsRunning)
+                        .labelsHidden()
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
                 } label: {
                     RowLabel(icon: "eye.fill", tint: .teal, title: "Only jiggle while a target app is running")
                 }
@@ -248,7 +258,7 @@ struct AboutPane: View {
             Text("MouseJiggler")
                 .font(.title2).bold()
 
-            Text("Version 1.2")
+            Text("Version 1.2.1")
                 .font(.callout)
                 .foregroundColor(.secondary)
 
