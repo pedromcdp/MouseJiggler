@@ -45,6 +45,16 @@ struct GeneralPane: View {
                     RowLabel(icon: "timer", tint: .orange, title: "Jiggle interval")
                 }
                 .help("How often the cursor nudges while active.")
+
+                LabeledContent {
+                    Toggle("", isOn: $store.settings.checkLessOftenOnBattery)
+                        .labelsHidden()
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
+                } label: {
+                    RowLabel(icon: "battery.75percent", tint: .green, title: "Check less often on battery")
+                }
+                .help("Checks schedule and status less often while on battery. The jiggle interval itself never changes.")
             }
 
             Section {
@@ -98,6 +108,7 @@ struct GeneralPane: View {
     private var statusTitle: String {
         switch engine.activityState {
         case .stopped: return "Stopped"
+        case .needsPermission: return "Needs Accessibility permission"
         case .waitingForConditions: return "Waiting for schedule / app match"
         case .skippingUserActive: return "Skipping — you're already active"
         case .jiggling: return "Currently jiggling"
@@ -107,6 +118,7 @@ struct GeneralPane: View {
     private var statusColor: Color {
         switch engine.activityState {
         case .stopped, .waitingForConditions: return .secondary
+        case .needsPermission: return .red
         case .skippingUserActive: return .yellow
         case .jiggling: return Palette.accent
         }
@@ -197,7 +209,7 @@ struct DetectionPane: View {
                     RowLabel(icon: "eye.fill", tint: .teal, title: "Only jiggle while a target app is running")
                 }
             } footer: {
-                Text("Checked every 15 seconds against the list below.")
+                Text("Checked whenever an app launches or quits, against the list below.")
             }
 
             Section {
@@ -221,12 +233,8 @@ struct DetectionPane: View {
 
                 HStack {
                     TextField("com.example.app (bundle ID)", text: $newBundleID)
-                    Button("Add") {
-                        let trimmed = newBundleID.trimmingCharacters(in: .whitespaces)
-                        guard !trimmed.isEmpty else { return }
-                        store.settings.targetBundleIDs.insert(trimmed)
-                        newBundleID = ""
-                    }
+                        .onSubmit(addBundleID)
+                    Button("Add", action: addBundleID)
                 }
             } header: {
                 Text("Target Apps")
@@ -235,6 +243,13 @@ struct DetectionPane: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    private func addBundleID() {
+        let trimmed = newBundleID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        store.settings.targetBundleIDs.insert(trimmed)
+        newBundleID = ""
     }
 }
 

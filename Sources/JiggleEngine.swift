@@ -1,11 +1,13 @@
 import Cocoa
 import Combine
+import IOKit.ps
 
 /// The four states the engine can be in, used to drive both the Preferences
 /// status row and the menu bar dropdown from one place instead of two
 /// separately-maintained string computations.
 enum ActivityState {
     case stopped
+    case needsPermission        // running, but macOS is dropping our synthetic mouse events
     case waitingForConditions   // schedule or app-detection not satisfied
     case skippingUserActive     // conditions met, but you're already at the mouse/keyboard
     case jiggling
@@ -22,8 +24,14 @@ final class JiggleEngine: ObservableObject {
     /// actual jiggle because you were already using the mouse/keyboard.
     @Published var isSkippingDueToActivity = false
 
+    /// Whether macOS will actually deliver the events jiggle() posts. Without
+    /// Accessibility permission they're dropped silently, so this is the only
+    /// way to tell "running" apart from "running and actually working".
+    @Published var canPostEvents = true
+
     var activityState: ActivityState {
         if !isRunning { return .stopped }
+        if !canPostEvents { return .needsPermission }
         if !isActiveNow { return .waitingForConditions }
         if isSkippingDueToActivity { return .skippingUserActive }
         return .jiggling
@@ -31,6 +39,9 @@ final class JiggleEngine: ObservableObject {
 
     private var jiggleTimer: Timer?
     private var evaluationTimer: Timer?
+    private var evaluationInterval: TimeInterval = 0
+    private var powerSourceRunLoopSource: CFRunLoopSource?
+    private var appNapActivity: NSObjectProtocol?
     private let store: SettingsStore
     private var cancellables = Set<AnyCancellable>()
 
@@ -38,18 +49,46 @@ final class JiggleEngine: ObservableObject {
         self.store = store
         store.$settings
             .sink { [weak self] _ in
-                self?.restartJiggleTimer()
-                self?.evaluateActivity()
+                // @Published emits before the new value is stored, so hop to
+                // the next run loop pass to read the updated settings.
+                DispatchQueue.main.async {
+                    self?.restartJiggleTimer()
+                    self?.updateEvaluationTimer()
+                    self?.evaluateActivity()
+                }
             }
             .store(in: &cancellables)
+
+        // React to target apps launching/quitting immediately instead of
+        // waiting for the next evaluation tick.
+        let workspaceCenter = NSWorkspace.shared.notificationCenter
+        for name in [NSWorkspace.didLaunchApplicationNotification, NSWorkspace.didTerminateApplicationNotification] {
+            workspaceCenter.publisher(for: name)
+                .sink { [weak self] _ in self?.evaluateActivity() }
+                .store(in: &cancellables)
+        }
+
+        observePowerSource()
+    }
+
+    deinit {
+        if let source = powerSourceRunLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .defaultMode)
+        }
     }
 
     func start() {
+        guard !isRunning else { return }
         isRunning = true
+        // A menu bar app with no visible window is a prime App Nap candidate,
+        // and App Nap can defer timers by minutes — long enough for Teams to
+        // flip to Away while everything here still looks "on".
+        appNapActivity = ProcessInfo.processInfo.beginActivity(
+            options: .userInitiatedAllowingIdleSystemSleep,
+            reason: "Keeping the jiggle timer on schedule"
+        )
         restartJiggleTimer()
-        evaluationTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
-            self?.evaluateActivity()
-        }
+        updateEvaluationTimer()
         evaluateActivity()
     }
 
@@ -57,6 +96,10 @@ final class JiggleEngine: ObservableObject {
         isRunning = false
         jiggleTimer?.invalidate(); jiggleTimer = nil
         evaluationTimer?.invalidate(); evaluationTimer = nil
+        if let activity = appNapActivity {
+            ProcessInfo.processInfo.endActivity(activity)
+            appNapActivity = nil
+        }
         isActiveNow = false
         isSkippingDueToActivity = false
     }
@@ -64,17 +107,64 @@ final class JiggleEngine: ObservableObject {
     private func restartJiggleTimer() {
         jiggleTimer?.invalidate()
         guard isRunning else { return }
-        jiggleTimer = Timer.scheduledTimer(withTimeInterval: store.settings.interval, repeats: true) { [weak self] _ in
+        let timer = Timer.scheduledTimer(withTimeInterval: store.settings.interval, repeats: true) { [weak self] _ in
             self?.tick()
         }
+        timer.tolerance = 1
+        jiggleTimer = timer
+    }
+
+    /// The evaluation timer only keeps the displayed status fresh — every
+    /// jiggle tick re-evaluates on its own — so it's safe to slow it down on
+    /// battery. The jiggle interval itself is never touched by power source.
+    private func updateEvaluationTimer() {
+        guard isRunning else { return }
+        let interval: TimeInterval = (store.settings.checkLessOftenOnBattery && isOnBattery()) ? 180 : 15
+        // Power-source notifications also fire on every battery percentage
+        // change, so only rebuild when the interval actually changes —
+        // otherwise a long timer would keep getting reset and never fire.
+        guard evaluationTimer == nil || interval != evaluationInterval else { return }
+
+        evaluationTimer?.invalidate()
+        let timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+            self?.evaluateActivity()
+        }
+        timer.tolerance = interval * 0.1
+        evaluationTimer = timer
+        evaluationInterval = interval
+    }
+
+    private func isOnBattery() -> Bool {
+        guard let info = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
+              let type = IOPSGetProvidingPowerSourceType(info)?.takeUnretainedValue() else {
+            return false
+        }
+        return (type as String) == kIOPSBatteryPowerValue
+    }
+
+    /// Subscribes to plug/unplug events rather than polling power state.
+    private func observePowerSource() {
+        let context = Unmanaged.passUnretained(self).toOpaque()
+        guard let source = IOPSNotificationCreateRunLoopSource({ context in
+            guard let context else { return }
+            Unmanaged<JiggleEngine>.fromOpaque(context).takeUnretainedValue().updateEvaluationTimer()
+        }, context)?.takeRetainedValue() else { return }
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .defaultMode)
+        powerSourceRunLoopSource = source
     }
 
     private func tick() {
         evaluateActivity()
-        guard isActiveNow else { return }
+        guard isActiveNow, canPostEvents else { return }
 
-        if store.settings.pauseWhenUserActive && isUserRecentlyActive() {
+        let idle = systemIdleSeconds()
+        if store.settings.pauseWhenUserActive && idle < store.settings.activityThreshold {
             isSkippingDueToActivity = true
+            // Your input just reset the system idle clock, so the next nudge is
+            // due one interval after *that input* — not one interval after this
+            // tick. Without re-aligning, the idle gap could reach
+            // interval + threshold (e.g. 5m30s), past Teams' 5-minute Away cutoff.
+            jiggleTimer?.fireDate = Date().addingTimeInterval(max(store.settings.interval - idle, 1))
             return
         }
 
@@ -83,6 +173,7 @@ final class JiggleEngine: ObservableObject {
     }
 
     private func evaluateActivity() {
+        canPostEvents = CGPreflightPostEventAccess()
         isActiveNow = isRunning && withinSchedule() && targetAppsSatisfied()
         if !isActiveNow {
             isSkippingDueToActivity = false
@@ -127,10 +218,6 @@ final class JiggleEngine: ObservableObject {
     private func systemIdleSeconds() -> TimeInterval {
         let anyInputEventType = CGEventType(rawValue: ~UInt32(0))!
         return CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: anyInputEventType)
-    }
-
-    private func isUserRecentlyActive() -> Bool {
-        systemIdleSeconds() < store.settings.activityThreshold
     }
 
     /// Nudges the cursor 1px and back — enough to reset the OS/Teams idle

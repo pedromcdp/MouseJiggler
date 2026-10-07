@@ -10,6 +10,8 @@
 "Jiggle interval" = "Intervalo de agitação";
 "Starts MouseJiggler automatically when you log in." = "Inicia o MouseJiggler automaticamente ao iniciares sessão.";
 "How often the cursor nudges while active." = "Com que frequência o cursor se mexe enquanto está ativo.";
+"Checks schedule and status less often while on battery. The jiggle interval itself never changes." = "Verifica o horário e o estado com menos frequência quando estás a usar a bateria. O intervalo de agitação nunca muda.";
+"Check less often on battery" = "Verificar menos vezes com bateria";
 "Skip if you're already active" = "Ignorar se já estiveres ativo";
 "Activity threshold" = "Limite de atividade";
 "Won't nudge the mouse if you've used it or the keyboard more recently than the threshold below." = "Não mexe no rato se o tiveres usado, ou ao teclado, mais recentemente do que o limite abaixo.";
@@ -28,7 +30,7 @@
 
 /* Detection pane */
 "Only jiggle while a target app is running" = "Agitar apenas enquanto uma app-alvo estiver aberta";
-"Checked every 15 seconds against the list below." = "Verificado a cada 15 segundos com base na lista abaixo.";
+"Checked whenever an app launches or quits, against the list below." = "Verificado sempre que uma app abre ou fecha, com base na lista abaixo.";
 "Target Apps" = "Apps-Alvo";
 "Add" = "Adicionar";
 "com.example.app (bundle ID)" = "com.example.app (ID do pacote)";
@@ -53,6 +55,7 @@
 "Waiting for schedule / app match" = "À espera do horário / app";
 "Skipping — you're already active" = "A ignorar — já estás ativo";
 "Currently jiggling" = "A agitar";
+"Needs Accessibility permission" = "Requer permissão de Acessibilidade";
 "Paused — outside schedule or app not running" = "Em pausa — fora do horário ou app fechada";
 
 /* Menu bar dropdown */
@@ -60,6 +63,7 @@
 "Start" = "Iniciar";
 "Jiggle Interval" = "Intervalo de Agitação";
 "Preferences…" = "Preferências…";
+"Open Accessibility Settings…" = "Abrir Definições de Acessibilidade…";
 "Quit" = "Sair";
 "MouseJiggler Preferences" = "Preferências do MouseJiggler";
 

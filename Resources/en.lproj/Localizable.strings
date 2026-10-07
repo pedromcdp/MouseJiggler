@@ -10,6 +10,8 @@
 "Jiggle interval" = "Jiggle interval";
 "Starts MouseJiggler automatically when you log in." = "Starts MouseJiggler automatically when you log in.";
 "How often the cursor nudges while active." = "How often the cursor nudges while active.";
+"Checks schedule and status less often while on battery. The jiggle interval itself never changes." = "Checks schedule and status less often while on battery. The jiggle interval itself never changes.";
+"Check less often on battery" = "Check less often on battery";
 "Skip if you're already active" = "Skip if you're already active";
 "Activity threshold" = "Activity threshold";
 "Won't nudge the mouse if you've used it or the keyboard more recently than the threshold below." = "Won't nudge the mouse if you've used it or the keyboard more recently than the threshold below.";
@@ -28,7 +30,7 @@
 
 /* Detection pane */
 "Only jiggle while a target app is running" = "Only jiggle while a target app is running";
-"Checked every 15 seconds against the list below." = "Checked every 15 seconds against the list below.";
+"Checked whenever an app launches or quits, against the list below." = "Checked whenever an app launches or quits, against the list below.";
 "Target Apps" = "Target Apps";
 "Add" = "Add";
 "com.example.app (bundle ID)" = "com.example.app (bundle ID)";
@@ -53,6 +55,7 @@
 "Waiting for schedule / app match" = "Waiting for schedule / app match";
 "Skipping — you're already active" = "Skipping — you're already active";
 "Currently jiggling" = "Currently jiggling";
+"Needs Accessibility permission" = "Needs Accessibility permission";
 "Paused — outside schedule or app not running" = "Paused — outside schedule or app not running";
 
 /* Menu bar dropdown */
@@ -60,6 +63,7 @@
 "Start" = "Start";
 "Jiggle Interval" = "Jiggle Interval";
 "Preferences…" = "Preferences…";
+"Open Accessibility Settings…" = "Open Accessibility Settings…";
 "Quit" = "Quit";
 "MouseJiggler Preferences" = "MouseJiggler Preferences";
 

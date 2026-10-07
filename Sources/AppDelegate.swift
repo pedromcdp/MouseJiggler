@@ -22,17 +22,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.delegate = self // menuNeedsUpdate rebuilds it fresh every time it's opened
         statusItem.menu = menu
 
+        installEditMenu()
+
         if store.settings.launchAtLogin {
             LoginItemManager.setEnabled(true)
         }
 
         engine.start()
 
-        Publishers.CombineLatest3(engine.$isRunning, engine.$isActiveNow, engine.$isSkippingDueToActivity)
+        Publishers.CombineLatest4(engine.$isRunning, engine.$isActiveNow, engine.$isSkippingDueToActivity, engine.$canPostEvents)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] running, active, skipping in
+            .sink { [weak self] running, active, skipping, canPost in
                 guard let self else { return }
-                if !running || !active {
+                if running && !canPost {
+                    self.statusItem.button?.title = "⚠️"
+                } else if !running || !active {
                     self.statusItem.button?.title = "⚪️"
                 } else if skipping {
                     self.statusItem.button?.title = "🟡"
@@ -52,6 +56,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let statusHeader = NSMenuItem(title: statusDescription, action: nil, keyEquivalent: "")
         statusHeader.isEnabled = false
         menu.addItem(statusHeader)
+
+        if engine.activityState == .needsPermission {
+            let permissionItem = NSMenuItem(title: NSLocalizedString("Open Accessibility Settings…", comment: ""), action: #selector(openAccessibilitySettings), keyEquivalent: "")
+            permissionItem.target = self
+            menu.addItem(permissionItem)
+        }
 
         menu.addItem(NSMenuItem.separator())
 
@@ -93,10 +103,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusDescription: String {
         switch engine.activityState {
         case .stopped: return "⚪️ " + NSLocalizedString("Stopped", comment: "")
+        case .needsPermission: return "⚠️ " + NSLocalizedString("Needs Accessibility permission", comment: "")
         case .waitingForConditions: return "⏸️ " + NSLocalizedString("Paused — outside schedule or app not running", comment: "")
         case .skippingUserActive: return "🟡 " + NSLocalizedString("Skipping — you're already active", comment: "")
         case .jiggling: return "🟢 " + NSLocalizedString("Currently jiggling", comment: "")
         }
+    }
+
+    @objc private func openAccessibilitySettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") else { return }
+        NSWorkspace.shared.open(url)
+    }
+
+    /// An .accessory app never shows a menu bar, but AppKit still routes key
+    /// equivalents through NSApp.mainMenu — without these items, ⌘V/⌘C/⌘A
+    /// do nothing in Preferences text fields.
+    private func installEditMenu() {
+        let editMenu = NSMenu(title: "Edit")
+        editMenu.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
+        editMenu.addItem(withTitle: "Redo", action: Selector(("redo:")), keyEquivalent: "Z")
+        editMenu.addItem(NSMenuItem.separator())
+        editMenu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        editMenu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        editMenu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        editMenu.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        editMenu.addItem(NSMenuItem.separator())
+        editMenu.addItem(withTitle: "Close Window", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
+
+        let editItem = NSMenuItem()
+        editItem.submenu = editMenu
+        let mainMenu = NSMenu()
+        mainMenu.addItem(editItem)
+        NSApp.mainMenu = mainMenu
     }
 
     @objc private func toggleRunning() {
@@ -136,8 +174,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             window.contentMaxSize = NSSize(width: 640, height: 460)
             settingsWindow = window
         }
+        // Activate *before* making the window key. An .accessory app isn't
+        // active when its menu item fires, so ordering the window front first
+        // can leave it visible but never key — clicks work, keystrokes don't.
+        if #available(macOS 14.0, *) {
+            NSApp.activate()
+        } else {
+            NSApp.activate(ignoringOtherApps: true)
+        }
         settingsWindow?.center()
         settingsWindow?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
 }

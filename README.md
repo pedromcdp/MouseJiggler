@@ -130,9 +130,11 @@ MouseJiggler/
 
 The engine reads the current cursor position, nudges it 1px, then moves it
 back 50ms later — enough to reset the OS's idle timer without visibly
-disturbing your cursor. A background check every 15 seconds evaluates
+disturbing your cursor. A background check (every 15 seconds, or every 3
+minutes on battery if "Check less often on battery" is on) evaluates
 whether the current time/day falls in your schedule and whether your chosen
-target apps (Teams/Slack) are running. Right before each nudge, it also
+target apps (Teams/Slack) are running — app launches and quits are also
+picked up instantly via workspace notifications. Right before each nudge, it also
 checks real system idle time (the same mechanism macOS itself uses for the
 screen saver) and skips the nudge entirely if you've genuinely used the
 mouse or keyboard more recently than your configured threshold.
